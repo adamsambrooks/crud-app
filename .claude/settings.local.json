@@ -13,7 +13,8 @@
       "Bash(git mv:*)",
       "Bash(git add:*)",
       "Bash(npm run dev:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
