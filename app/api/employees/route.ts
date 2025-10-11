@@ -39,10 +39,20 @@ export async function POST(request: NextRequest) {
       !newEmployee.lastName ||
       !newEmployee.email ||
       !newEmployee.salary ||
-      !newEmployee.date
+      !newEmployee.date ||
+      typeof newEmployee.active !== 'boolean' ||
+      !newEmployee.payType
     ) {
       return NextResponse.json(
         { error: 'All fields are required.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate payType enum
+    if (!['Hourly', 'Salary', 'Pct'].includes(newEmployee.payType)) {
+      return NextResponse.json(
+        { error: 'Invalid pay type. Must be Hourly, Salary, or Pct.' },
         { status: 400 }
       );
     }

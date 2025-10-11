@@ -26,10 +26,20 @@ export async function PUT(
       !updatedData.lastName ||
       !updatedData.email ||
       !updatedData.salary ||
-      !updatedData.date
+      !updatedData.date ||
+      typeof updatedData.active !== 'boolean' ||
+      !updatedData.payType
     ) {
       return NextResponse.json(
         { error: 'All fields are required.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate payType enum
+    if (!['Hourly', 'Salary', 'Pct'].includes(updatedData.payType)) {
+      return NextResponse.json(
+        { error: 'Invalid pay type. Must be Hourly, Salary, or Pct.' },
         { status: 400 }
       );
     }

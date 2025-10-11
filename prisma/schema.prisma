@@ -20,6 +20,8 @@ model Employee {
   email     String   @unique
   salary    String
   date      DateTime
+  active    Boolean  @default(true)
+  payType   String   @default("Salary") @map("pay_type")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 

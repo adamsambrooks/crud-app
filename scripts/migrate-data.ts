@@ -9,6 +9,8 @@ const employeesData = [
     email: 'susan@example.com',
     salary: '95000',
     date: '2019-04-11',
+    active: true,
+    payType: 'Salary',
   },
   {
     firstName: 'Adrienne',
@@ -16,6 +18,8 @@ const employeesData = [
     email: 'adrienne@example.com',
     salary: '80000',
     date: '2019-04-17',
+    active: true,
+    payType: 'Salary',
   },
   {
     firstName: 'Rolf',
@@ -23,6 +27,8 @@ const employeesData = [
     email: 'rolf@example.com',
     salary: '79000',
     date: '2019-05-01',
+    active: false,
+    payType: 'Hourly',
   },
   {
     firstName: 'Kent',
@@ -30,6 +36,8 @@ const employeesData = [
     email: 'kent@example.com',
     salary: '56000',
     date: '2019-05-03',
+    active: true,
+    payType: 'Hourly',
   },
   {
     firstName: 'Arsenio',
@@ -37,6 +45,8 @@ const employeesData = [
     email: 'arsenio@example.com',
     salary: '65000',
     date: '2019-06-13',
+    active: true,
+    payType: 'Pct',
   },
   {
     firstName: 'Laurena',
@@ -44,6 +54,8 @@ const employeesData = [
     email: 'laurena@example.com',
     salary: '120000',
     date: '2019-07-30',
+    active: true,
+    payType: 'Salary',
   },
   {
     firstName: 'George',
@@ -51,6 +63,8 @@ const employeesData = [
     email: 'george@example.com',
     salary: '90000',
     date: '2019-08-15',
+    active: false,
+    payType: 'Salary',
   },
   {
     firstName: 'Jesica',
@@ -58,6 +72,8 @@ const employeesData = [
     email: 'jesica@example.com',
     salary: '60000',
     date: '2019-10-10',
+    active: true,
+    payType: 'Hourly',
   },
   {
     firstName: 'Matthew',
@@ -65,6 +81,8 @@ const employeesData = [
     email: 'matthew@example.com',
     salary: '71000',
     date: '2019-10-15',
+    active: true,
+    payType: 'Pct',
   },
   {
     firstName: 'Lyndsey',
@@ -72,6 +90,8 @@ const employeesData = [
     email: 'lyndsey@example.com',
     salary: '110000',
     date: '2020-01-15',
+    active: true,
+    payType: 'Salary',
   },
 ];
 
@@ -95,6 +115,8 @@ async function main() {
         email: employee.email,
         salary: employee.salary,
         date: new Date(employee.date),
+        active: employee.active,
+        payType: employee.payType,
       },
     });
     console.log(`✓ Migrated ${employee.firstName} ${employee.lastName}`);

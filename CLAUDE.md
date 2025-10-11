@@ -6,6 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a modern employee management CRUD (Create, Read, Update, Delete) application built with **Next.js 15** using the **App Router**. It demonstrates full-stack CRUD operations with server-side authentication, API routes, and **SQLite database** persistence via Prisma ORM.
 
+## Quick Reference: Key Files
+
+- **`app/`** — Next.js App Router. Server components by default; client components must include `'use client'`
+- **`app/api/`** — Backend API routes. See `app/api/employees/route.ts` and `app/api/employees/[id]/route.ts` for patterns
+- **`lib/db.ts`** — Prisma client singleton and all DB helpers (getAllEmployees, createEmployee, updateEmployee, deleteEmployee, emailExists)
+- **`lib/auth.ts`** — Auth constants and `validateCredentials`. Cookie name: `auth_token`
+- **`lib/types.ts`** — TypeScript interfaces (Employee, AuthState)
+- **`prisma/schema.prisma`** — Database schema (SQLite provider, `Employee` model)
+- **`scripts/migrate-data.ts`** — Seed script; run via `npm run migrate-data`
+- **`middleware.ts`** — Next.js middleware for protecting routes and handling auth redirects
+- **`components/`** — Client-side UI components (all use `'use client'` directive)
+
 ## Development Commands
 
 ```bash
@@ -74,6 +86,14 @@ app/
 - **Date serialization**: Dates stored as DateTime type, serialized to YYYY-MM-DD for API responses
 - **Prisma singleton pattern**: Uses global singleton in development to prevent multiple client instances
 
+**Database Helper Functions (lib/db.ts):**
+- `getAllEmployees()`: Returns all employees ordered by ID
+- `getEmployeeById(id)`: Returns single employee or null
+- `createEmployee(data)`: Creates new employee (auto-generates ID)
+- `updateEmployee(id, data)`: Updates employee or returns null if not found
+- `deleteEmployee(id)`: Deletes employee or returns null if not found
+- `emailExists(email, excludeId?)`: Checks if email is already used (useful for validation)
+
 ### Component Architecture
 
 **Client vs Server Components**:
@@ -114,32 +134,110 @@ Fully typed with TypeScript:
 
 ### Adding New Employee Fields
 
-1. Update `Employee` model in `prisma/schema.prisma`
-2. Run `npm run db:push` to update database schema
-3. Update `Employee` interface in `lib/types.ts`
-4. Update database utility functions in `lib/db.ts` (if needed)
-5. Update seed data in `lib/data.ts` and `scripts/migrate-data.ts`
-6. Add form inputs in `components/AddEmployee.tsx` and `components/EditEmployee.tsx`
-7. Add table column in `components/Table.tsx`
+When adding or renaming employee fields, follow this checklist:
+
+1. **Update database schema**: Modify `Employee` model in `prisma/schema.prisma`
+   ```prisma
+   model Employee {
+     // ... existing fields
+     newField String  // Add your new field
+   }
+   ```
+
+2. **Apply schema changes**: Run `npm run db:push` to update the database
+
+3. **Update TypeScript types**: Modify `Employee` interface in `lib/types.ts`
+   ```typescript
+   export interface Employee {
+     // ... existing fields
+     newField: string;
+   }
+   ```
+
+4. **Update database utilities** (if needed): Modify `serializeEmployee()` and CRUD functions in `lib/db.ts`
+
+5. **Update seed data**: Add the new field to `lib/data.ts` and `scripts/migrate-data.ts`
+
+6. **Update UI components**:
+   - Add form inputs in `components/AddEmployee.tsx` and `components/EditEmployee.tsx`
+   - Add table column in `components/Table.tsx`
+
+7. **Test**: Run `npm run dev` and verify CRUD operations work with the new field
 
 ### Modifying API Routes
 
 All API routes follow Next.js App Router conventions:
 - **GET/POST**: Export from `route.ts` (e.g., `/api/employees/route.ts`)
 - **PUT/DELETE**: Use dynamic routes with `[id]` (e.g., `/api/employees/[id]/route.ts`)
-- Authentication checked via `isAuthenticated()` helper
+- Authentication checked via `isAuthenticated()` helper from `lib/auth.ts`
 - Use `NextRequest` and `NextResponse` for typed request/response handling
-- Database operations use functions from `lib/db.ts` (getAllEmployees, createEmployee, etc.)
-- Prisma error codes handled:
-  - `P2002`: Unique constraint violation (duplicate email) → 409 Conflict
-  - `P2025`: Record not found → 404 Not Found
+- Database operations use functions from `lib/db.ts` (getAllEmployees, createEmployee, updateEmployee, deleteEmployee, emailExists)
+
+**Authentication Pattern:**
+```typescript
+const authToken = request.cookies.get('auth_token');
+if (!authToken) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+```
+
+**Request Validation Pattern (POST `/api/employees`):**
+```typescript
+const { firstName, lastName, email, salary, date } = await request.json();
+
+// Validate required fields
+if (!firstName || !lastName || !email || !salary || !date) {
+  return NextResponse.json(
+    { error: 'Missing required fields' },
+    { status: 400 }
+  );
+}
+```
+
+**Prisma Error Handling:**
+```typescript
+try {
+  const employee = await createEmployee(data);
+  return NextResponse.json(employee, { status: 201 });
+} catch (error: any) {
+  if (error.code === 'P2002') {
+    // Unique constraint violation (duplicate email)
+    return NextResponse.json(
+      { error: 'Email already exists' },
+      { status: 409 }
+    );
+  }
+  if (error.code === 'P2025') {
+    // Record not found
+    return NextResponse.json(
+      { error: 'Employee not found' },
+      { status: 404 }
+    );
+  }
+  throw error;
+}
+```
+
+**Common Status Codes:**
+- `200`: Success (GET, PUT, DELETE)
+- `201`: Created (POST)
+- `400`: Bad Request (missing/invalid fields)
+- `401`: Unauthorized (missing auth token)
+- `404`: Not Found (employee doesn't exist)
+- `409`: Conflict (duplicate email)
+- `500`: Internal Server Error
 
 ### Adding New Pages
 
 1. Create `page.tsx` in appropriate `app/` subdirectory
-2. Add `'use client'` if page needs client-side interactivity
-3. Update middleware matcher if page requires authentication
-4. Import types from `lib/types.ts`
+2. Add `'use client'` directive at the top if page needs client-side interactivity (forms, state, event handlers)
+3. Update `middleware.ts` matcher if page requires authentication
+4. Import types from `lib/types.ts` for type safety
+
+**Example**: To add a new authenticated page at `/reports`:
+- Create `app/reports/page.tsx`
+- Add `'use client'` if needed
+- Update middleware config: `matcher: ['/dashboard/:path*', '/reports', '/login']`
 
 ## Key Differences from Old React Version
 
@@ -186,22 +284,28 @@ crud-app/
 
 ### First-Time Setup
 
-1. **Push database schema:**
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Push database schema:**
    ```bash
    npm run db:push
    ```
    This creates the SQLite database file (`prisma/dev.db`) and applies the schema.
 
-2. **Seed initial data:**
+3. **Seed initial data:**
    ```bash
    npm run migrate-data
    ```
    This populates the database with 10 sample employee records.
 
-3. **Start Next.js development server:**
+4. **Start Next.js development server:**
    ```bash
    npm run dev
    ```
+   App runs on [http://localhost:3000](http://localhost:3000). Default login: `admin@example.com` / `qwerty`
 
 ### Viewing Database Contents
 
@@ -218,12 +322,27 @@ This opens Prisma Studio in your browser - a GUI to view and edit database recor
 
 ## Security Notes
 
-- **Mock authentication**: Still uses hardcoded credentials (admin@example.com / qwerty)
+- **Mock authentication**: Uses hardcoded credentials (`admin@example.com` / `qwerty` in `lib/auth.ts`)
 - **Development database**: SQLite is suitable for development but consider PostgreSQL/MySQL for production
-- **No password hashing**: Plain text password comparison for auth
-- For production:
-  - Migrate to production database (PostgreSQL, MySQL, etc.) by updating `prisma/schema.prisma` provider
-  - Use `DATABASE_URL` environment variable in deployment platform
-  - Implement proper password hashing (bcrypt)
-  - Consider JWT/sessions for authentication tokens
-  - Update database connection in deployment settings
+- **No password hashing**: Plain text password comparison for authentication
+- **HTTP-only cookies**: Auth token stored in `auth_token` cookie (more secure than localStorage)
+
+**For Production Deployment:**
+1. Migrate to production database (PostgreSQL, MySQL, etc.):
+   - Update `provider` in `prisma/schema.prisma`
+   - Set `DATABASE_URL` environment variable
+2. Implement proper password hashing (bcrypt, argon2)
+3. Use secure session management (JWT or session tokens with proper expiration)
+4. Enable HTTPS only for cookies
+5. Add rate limiting for API routes
+6. Implement proper CSRF protection
+
+## Pre-Deployment Checklist
+
+Before running `npm run build`:
+- [ ] Run `npm run lint` and fix all issues
+- [ ] Run `npm run db:push` if schema changed
+- [ ] Test all CRUD operations locally with `npm run dev`
+- [ ] Verify authentication flow (login, logout, protected routes)
+- [ ] Check that unique email constraint works (try creating duplicate)
+- [ ] Ensure database is seeded with `npm run migrate-data` (if needed)

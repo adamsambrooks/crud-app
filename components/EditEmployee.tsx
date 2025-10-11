@@ -16,11 +16,13 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
   const [email, setEmail] = useState(employee.email);
   const [salary, setSalary] = useState(employee.salary);
   const [date, setDate] = useState(employee.date);
+  const [active, setActive] = useState(employee.active ?? true);
+  const [payType, setPayType] = useState<'Hourly' | 'Salary' | 'Pct'>(employee.payType ?? 'Salary');
 
   const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !email || !salary || !date) {
+    if (!firstName || !lastName || !email || !salary || !date || !payType) {
       return Swal.fire({
         icon: 'error',
         title: 'Error!',
@@ -39,6 +41,8 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
           email,
           salary,
           date,
+          active,
+          payType,
         }),
       });
 
@@ -140,6 +144,35 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
               onChange={(e) => setDate(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
             />
+          </div>
+          <div>
+            <label htmlFor="payType" className="block text-sm font-medium text-gray-700 mb-2">
+              Pay Type
+            </label>
+            <select
+              id="payType"
+              name="payType"
+              value={payType}
+              onChange={(e) => setPayType(e.target.value as 'Hourly' | 'Salary' | 'Pct')}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            >
+              <option value="Salary">Salary</option>
+              <option value="Hourly">Hourly</option>
+              <option value="Pct">Pct</option>
+            </select>
+          </div>
+          <div className="flex items-center">
+            <input
+              id="active"
+              type="checkbox"
+              name="active"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="active" className="ml-2 text-sm font-medium text-gray-700">
+              Active Employee
+            </label>
           </div>
           <div className="flex gap-3 pt-4">
             <button

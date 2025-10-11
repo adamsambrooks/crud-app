@@ -5,6 +5,8 @@ export interface Employee {
   email: string;
   salary: string;
   date: string;
+  active: boolean;
+  payType: 'Hourly' | 'Salary' | 'Pct';
 }
 
 export interface AuthState {

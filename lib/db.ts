@@ -21,6 +21,8 @@ function serializeEmployee(employee: any): Employee {
     date: employee.date instanceof Date
       ? employee.date.toISOString().split('T')[0]
       : employee.date,
+    active: employee.active,
+    payType: employee.payType,
   };
 }
 
@@ -51,6 +53,8 @@ export async function createEmployee(
       email: data.email,
       salary: data.salary,
       date: new Date(data.date),
+      active: data.active,
+      payType: data.payType,
     },
   });
   return serializeEmployee(employee);
@@ -70,6 +74,8 @@ export async function updateEmployee(
         email: data.email,
         salary: data.salary,
         date: new Date(data.date),
+        active: data.active,
+        payType: data.payType,
       },
     });
     return serializeEmployee(employee);

@@ -21,6 +21,8 @@ export default function Table({ employees, handleEdit, handleDelete }: TableProp
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Salary</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Pay Type</th>
+              <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Active</th>
               <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
@@ -34,6 +36,22 @@ export default function Table({ employees, handleEdit, handleDelete }: TableProp
                   <td className="px-6 py-4 text-sm text-gray-700">{employee.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">${employee.salary}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{employee.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {employee.payType}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-center">
+                    {employee.active ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        ✗ Inactive
+                      </span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex gap-2 justify-center">
                       <button
@@ -54,7 +72,7 @@ export default function Table({ employees, handleEdit, handleDelete }: TableProp
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                   No employees found. Add your first employee to get started!
                 </td>
               </tr>
