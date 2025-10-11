@@ -38,3 +38,5 @@ next-env.d.ts
 
 # data storage
 /data
+
+/src/generated/prisma

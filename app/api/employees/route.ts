@@ -1,39 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { Employee } from '@/lib/types';
-import { employeesData } from '@/lib/data';
 import { AUTH_COOKIE } from '@/lib/auth';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'employees.json');
-
-// Helper to ensure data directory exists
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-// Helper to read employees from file
-async function readEmployees(): Promise<Employee[]> {
-  try {
-    await ensureDataDir();
-    const data = await fs.readFile(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    // If file doesn't exist, return default data
-    return employeesData;
-  }
-}
-
-// Helper to write employees to file
-async function writeEmployees(employees: Employee[]): Promise<void> {
-  await ensureDataDir();
-  await fs.writeFile(DATA_FILE, JSON.stringify(employees, null, 2));
-}
+import { getAllEmployees, createEmployee } from '@/lib/db';
 
 // Helper to check authentication
 function isAuthenticated(request: NextRequest): boolean {
@@ -47,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const employees = await readEmployees();
+    const employees = await getAllEmployees();
     return NextResponse.json(employees);
   } catch (error) {
     return NextResponse.json(
@@ -64,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const newEmployee: Omit<Employee, 'id'> = await request.json();
+    const newEmployee = await request.json();
 
     // Validate required fields
     if (
@@ -80,23 +47,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const employees = await readEmployees();
-
-    // Generate new ID (find max ID and add 1)
-    const maxId = employees.length > 0
-      ? Math.max(...employees.map(e => e.id))
-      : 0;
-
-    const employee: Employee = {
-      ...newEmployee,
-      id: maxId + 1,
-    };
-
-    employees.push(employee);
-    await writeEmployees(employees);
-
+    const employee = await createEmployee(newEmployee);
     return NextResponse.json(employee, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    // P2002 means unique constraint violation (duplicate email)
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Email already exists.' },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to create employee' },
       { status: 500 }

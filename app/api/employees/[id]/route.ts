@@ -1,35 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { Employee } from '@/lib/types';
-import { employeesData } from '@/lib/data';
 import { AUTH_COOKIE } from '@/lib/auth';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'employees.json');
-
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function readEmployees(): Promise<Employee[]> {
-  try {
-    await ensureDataDir();
-    const data = await fs.readFile(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return employeesData;
-  }
-}
-
-async function writeEmployees(employees: Employee[]): Promise<void> {
-  await ensureDataDir();
-  await fs.writeFile(DATA_FILE, JSON.stringify(employees, null, 2));
-}
+import { updateEmployee, deleteEmployee } from '@/lib/db';
 
 function isAuthenticated(request: NextRequest): boolean {
   return !!request.cookies.get(AUTH_COOKIE);
@@ -47,7 +18,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const employeeId = parseInt(id);
-    const updatedData: Omit<Employee, 'id'> = await request.json();
+    const updatedData = await request.json();
 
     // Validate required fields
     if (
@@ -63,21 +34,24 @@ export async function PUT(
       );
     }
 
-    const employees = await readEmployees();
-    const index = employees.findIndex((e) => e.id === employeeId);
+    const employee = await updateEmployee(employeeId, updatedData);
 
-    if (index === -1) {
+    if (!employee) {
       return NextResponse.json(
         { error: 'Employee not found' },
         { status: 404 }
       );
     }
 
-    employees[index] = { ...updatedData, id: employeeId };
-    await writeEmployees(employees);
-
-    return NextResponse.json(employees[index]);
-  } catch (error) {
+    return NextResponse.json(employee);
+  } catch (error: any) {
+    // P2002 means unique constraint violation (duplicate email)
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Email already exists.' },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to update employee' },
       { status: 500 }
@@ -98,8 +72,7 @@ export async function DELETE(
     const { id } = await params;
     const employeeId = parseInt(id);
 
-    const employees = await readEmployees();
-    const employee = employees.find((e) => e.id === employeeId);
+    const employee = await deleteEmployee(employeeId);
 
     if (!employee) {
       return NextResponse.json(
@@ -107,9 +80,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    const filteredEmployees = employees.filter((e) => e.id !== employeeId);
-    await writeEmployees(filteredEmployees);
 
     return NextResponse.json({
       success: true,
