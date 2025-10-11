@@ -24,7 +24,8 @@
       "Bash(tasklist)",
       "Bash(git config:*)",
       "Bash(del nul)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []
