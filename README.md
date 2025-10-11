@@ -17,52 +17,116 @@
 </p>
 
 <p align="center">
-  A simple and beautiful <a href="https://www.codecademy.com/articles/what-is-crud">CRUD</a> application built with <a href="https://reactjs.org">React</a>.
+  A modern employee management <a href="https://www.codecademy.com/articles/what-is-crud">CRUD</a> application built with <a href="https://nextjs.org">Next.js 15</a> and <a href="https://tailwindcss.com">Tailwind CSS</a>.
 </p>
-
-![crud-app](https://user-images.githubusercontent.com/48409548/94567114-8aa5ea80-0284-11eb-99f6-87401b099848.png)
 
 ## Technologies Used
 
-- [React](http://reactjs.org)
-- [Primitive UI](https://taniarascia.github.io/primitive)
-- [SweetAlert2](https://sweetalert2.github.io)
+- [Next.js 15](https://nextjs.org) - React framework with App Router
+- [React 19](http://reactjs.org) - UI library
+- [TypeScript](https://www.typescriptlang.org) - Type safety
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [SweetAlert2](https://sweetalert2.github.io) - Beautiful alerts and modals
+- [Turbopack](https://turbo.build/pack) - Fast bundler for development
+
+## Features
+
+- ✅ Full CRUD operations (Create, Read, Update, Delete)
+- ✅ Server-side authentication with HTTP-only cookies
+- ✅ Protected routes with Next.js middleware
+- ✅ RESTful API routes
+- ✅ File-based data persistence
+- ✅ Responsive design with Tailwind CSS
+- ✅ TypeScript for type safety
+- ✅ Modern Next.js App Router architecture
 
 ## Development
 
 To get a local copy of the code, clone it using git:
 
-```
+```bash
 git clone https://github.com/SafdarJamal/crud-app.git
 cd crud-app
 ```
 
 Install dependencies:
 
-```
+```bash
 npm install
 ```
 
-Now, you can start a local web server by running:
+Now, you can start the development server with Turbopack:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+### Default Credentials
+
+- **Email**: admin@example.com
+- **Password**: qwerty
+
+### Available Scripts
+
+| Script          | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| `npm run dev`   | Runs the app in development mode with Turbopack                |
+| `npm run build` | Builds the app for production                                  |
+| `npm start`     | Runs the production build                                      |
+| `npm run lint`  | Runs ESLint to check code quality                              |
+
+## Architecture
+
+This app uses the **Next.js App Router** with:
+- **Server Components** for improved performance
+- **API Routes** for backend logic (`/app/api`)
+- **Middleware** for authentication (`middleware.ts`)
+- **Client Components** for interactive UI (`'use client'`)
+- **File-based routing** instead of manual route configuration
+
+## Project Structure
 
 ```
-npm start
+crud-app/
+├── app/                    # Next.js App Router
+│   ├── api/               # API route handlers
+│   │   ├── auth/         # Authentication endpoints
+│   │   └── employees/    # Employee CRUD endpoints
+│   ├── dashboard/         # Protected dashboard page
+│   ├── login/            # Login page
+│   ├── layout.tsx        # Root layout
+│   ├── page.tsx          # Home page
+│   └── globals.css       # Global styles
+├── components/            # Reusable React components
+├── lib/                   # Shared utilities and types
+│   ├── auth.ts           # Authentication helpers
+│   ├── data.ts           # Seed data
+│   └── types.ts          # TypeScript types
+├── middleware.ts          # Next.js middleware for auth
+└── data/                  # Runtime data storage (gitignored)
 ```
 
-and then you can open http://localhost:3000 to view it in the browser.
+## Migration from React
 
-#### Available Scripts
+This project has been migrated from Create React App to Next.js 15. Key improvements:
 
-| Script        | Description                                                             |
-| ------------- | ----------------------------------------------------------------------- |
-| npm start     | Runs the app in the development mode.                                   |
-| npm test      | Launches the test runner in the interactive watch mode.                 |
-| npm run build | Builds the app for production to the `build` folder.                    |
-| npm run eject | This command will remove the single build dependency from your project. |
+- **Server-side rendering** for better performance
+- **API routes** for backend logic (no separate backend needed)
+- **HTTP-only cookies** instead of localStorage for better security
+- **Fixed ID collision bug** from the original implementation
+- **TypeScript** for type safety
+- **Tailwind CSS** for modern styling
+- **Turbopack** for faster development builds
+
+See `CLAUDE.md` for detailed architecture documentation.
 
 ## Credits
 
 CRUD App is built and maintained by [Safdar Jamal](https://safdarjamal.github.io).
+
+Migrated to Next.js 15 with modern best practices.
 
 ## License
 

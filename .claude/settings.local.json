@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm audit fix:*)",
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(dir:*)",
+      "Bash(/cost)",
+      "Bash(npx prisma:*)",
+      "Bash(if not exist \"scripts\" mkdir scripts)",
+      "Bash(npm run migrate-data:*)",
+      "Bash(if exist .env type .env)",
+      "Bash(npm run:*)",
+      "Bash(tasklist)",
+      "Bash(git config:*)",
+      "Bash(del nul)",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
