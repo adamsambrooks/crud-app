@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface HeaderProps {
   setIsAdding: (value: boolean) => void;
   onLogout: () => void;
@@ -12,6 +14,12 @@ export default function Header({ setIsAdding, onLogout }: HeaderProps) {
         Employee Management Software
       </h1>
       <div className="flex gap-3">
+        <Link
+          href="/employees-table"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition inline-block"
+        >
+          Advanced Table View
+        </Link>
         <button
           onClick={() => setIsAdding(true)}
           className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md transition"

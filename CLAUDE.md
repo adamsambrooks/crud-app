@@ -10,13 +10,19 @@ This is a modern employee management CRUD (Create, Read, Update, Delete) applica
 
 - **`app/`** — Next.js App Router. Server components by default; client components must include `'use client'`
 - **`app/api/`** — Backend API routes. See `app/api/employees/route.ts` and `app/api/employees/[id]/route.ts` for patterns
+- **`app/dashboard/`** — Classic table view page with simple HTML table
+- **`app/employees-table/`** — Advanced table view with TanStack Table (filtering, sorting, search, pagination)
 - **`lib/db.ts`** — Prisma client singleton and all DB helpers (getAllEmployees, createEmployee, updateEmployee, deleteEmployee, emailExists)
 - **`lib/auth.ts`** — Auth constants and `validateCredentials`. Cookie name: `auth_token`
 - **`lib/types.ts`** — TypeScript interfaces (Employee, AuthState)
+- **`lib/utils.ts`** — Utility functions (cn helper for className merging)
 - **`prisma/schema.prisma`** — Database schema (SQLite provider, `Employee` model)
 - **`scripts/migrate-data.ts`** — Seed script; run via `npm run migrate-data`
 - **`middleware.ts`** — Next.js middleware for protecting routes and handling auth redirects
 - **`components/`** — Client-side UI components (all use `'use client'` directive)
+- **`components/ui/`** — shadcn/ui base components (Button, Input, Table, DropdownMenu)
+- **`components/data-table.tsx`** — TanStack Table wrapper component
+- **`components/employee-columns.tsx`** — Column definitions for TanStack Table
 
 ## Development Commands
 
@@ -48,21 +54,23 @@ This application uses the modern **Next.js App Router** (not Pages Router) with 
 
 ```
 app/
-├── layout.tsx           # Root layout with global styles
-├── page.tsx             # Home page (redirects to /login)
-├── globals.css          # Tailwind CSS styles
+├── layout.tsx              # Root layout with global styles
+├── page.tsx                # Home page (redirects to /login)
+├── globals.css             # Tailwind CSS styles
 ├── login/
-│   └── page.tsx         # Client component: Login page
+│   └── page.tsx            # Client component: Login page
 ├── dashboard/
-│   └── page.tsx         # Client component: Main dashboard with CRUD UI
+│   └── page.tsx            # Client component: Classic dashboard with simple table
+├── employees-table/
+│   └── page.tsx            # Client component: Advanced table with TanStack Table
 └── api/
     ├── auth/
-    │   ├── login/route.ts    # POST: Login authentication
-    │   ├── logout/route.ts   # POST: Logout
-    │   └── check/route.ts    # GET: Check auth status
+    │   ├── login/route.ts   # POST: Login authentication
+    │   ├── logout/route.ts  # POST: Logout
+    │   └── check/route.ts   # GET: Check auth status
     └── employees/
-        ├── route.ts          # GET: List all | POST: Create
-        └── [id]/route.ts     # PUT: Update | DELETE: Delete
+        ├── route.ts         # GET: List all | POST: Create
+        └── [id]/route.ts    # PUT: Update | DELETE: Delete
 ```
 
 ### Authentication System
@@ -116,12 +124,70 @@ Uses **React hooks** (useState, useEffect) for client-side state:
 - Employee data fetched from API on mount
 - No Redux or Context API needed for this scale
 
+### Advanced Table Component (TanStack Table)
+
+The application includes two table views for displaying employee data:
+
+1. **Classic Table** (`/dashboard`) - Simple HTML table with basic functionality
+2. **Advanced Table** (`/employees-table`) - Powered by TanStack Table v8 with advanced features
+
+**Advanced Table Features:**
+- **Global Search**: Search across all columns simultaneously
+- **Column Sorting**: Click column headers to sort (ascending/descending)
+- **Pagination**: Choose between 10, 25, 50, or 100 rows per page
+- **Column Visibility**: Show/hide columns via dropdown menu
+- **Responsive Design**: Optimized for all screen sizes
+- **CRUD Integration**: Full Edit/Delete functionality with SweetAlert2 modals
+
+**Key Files:**
+- `components/data-table.tsx` - Main TanStack Table wrapper component
+  - Manages table state (sorting, filtering, pagination, column visibility)
+  - Provides UI for search, column controls, and pagination
+  - Reusable for any data type via TypeScript generics
+
+- `components/employee-columns.tsx` - Column definitions for Employee data
+  - Defines sortable columns with custom sort functions
+  - Includes cell formatters (salary formatting, status badges)
+  - Integrates Edit/Delete action buttons
+  - Export `createEmployeeColumns()` function that accepts handlers
+
+- `components/ui/` - shadcn/ui base components
+  - `button.tsx` - Variants: default, destructive, outline, ghost, link
+  - `input.tsx` - Styled input with focus states
+  - `table.tsx` - Table primitives (Table, TableHeader, TableBody, TableRow, TableCell)
+  - `dropdown-menu.tsx` - Dropdown menu for column visibility
+
+**Adding TanStack Table to New Pages:**
+```typescript
+import { DataTable } from '@/components/data-table';
+import { createEmployeeColumns } from '@/components/employee-columns';
+
+const columns = createEmployeeColumns(handleEdit, handleDelete);
+return <DataTable columns={columns} data={employees} />;
+```
+
+**Creating New Column Definitions:**
+```typescript
+import { ColumnDef } from "@tanstack/react-table"
+
+export const myColumns: ColumnDef<MyType>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+  },
+  // ... more columns
+]
+```
+
 ### Styling
 
 **Tailwind CSS** for modern, utility-first styling:
 - Configuration in `tailwind.config.ts`
 - Global styles in `app/globals.css`
 - Responsive design with gradient backgrounds and hover effects
+- shadcn/ui components use Tailwind utility classes
+- `lib/utils.ts` provides `cn()` helper for conditional class merging
 
 ### TypeScript
 
@@ -257,27 +323,40 @@ try {
 
 ```
 crud-app/
-├── app/                    # Next.js App Router
-│   ├── api/               # API route handlers
-│   ├── dashboard/         # Dashboard page
-│   ├── login/            # Login page
-│   ├── layout.tsx        # Root layout
-│   ├── page.tsx          # Home (redirects)
-│   └── globals.css       # Global styles
-├── components/            # Reusable React components
-├── lib/                   # Shared utilities and types
-│   ├── auth.ts           # Authentication helpers
-│   ├── data.ts           # Seed data (for migration script)
-│   ├── db.ts             # Prisma client singleton & database utilities
-│   └── types.ts          # TypeScript types
-├── prisma/                # Prisma ORM configuration
-│   └── schema.prisma     # Database schema definition
-├── scripts/               # Utility scripts
-│   └── migrate-data.ts   # Database seeding script
-├── middleware.ts          # Next.js middleware for auth
-├── next.config.ts         # Next.js configuration
-├── tailwind.config.ts     # Tailwind CSS config
-└── tsconfig.json          # TypeScript config
+├── app/                      # Next.js App Router
+│   ├── api/                 # API route handlers
+│   ├── dashboard/           # Classic table view page
+│   ├── employees-table/     # Advanced TanStack Table page
+│   ├── login/              # Login page
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Home (redirects)
+│   └── globals.css         # Global styles
+├── components/              # Reusable React components
+│   ├── ui/                 # shadcn/ui base components
+│   │   ├── button.tsx      # Button component
+│   │   ├── input.tsx       # Input component
+│   │   ├── table.tsx       # Table primitives
+│   │   └── dropdown-menu.tsx # Dropdown menu
+│   ├── data-table.tsx      # TanStack Table wrapper
+│   ├── employee-columns.tsx # Employee column definitions
+│   ├── Table.tsx           # Classic table component
+│   ├── Header.tsx          # Dashboard header
+│   ├── AddEmployee.tsx     # Add employee form
+│   └── EditEmployee.tsx    # Edit employee form
+├── lib/                     # Shared utilities and types
+│   ├── auth.ts             # Authentication helpers
+│   ├── data.ts             # Seed data (for migration script)
+│   ├── db.ts               # Prisma client singleton & database utilities
+│   ├── types.ts            # TypeScript types
+│   └── utils.ts            # Utility functions (cn helper)
+├── prisma/                  # Prisma ORM configuration
+│   └── schema.prisma       # Database schema definition
+├── scripts/                 # Utility scripts
+│   └── migrate-data.ts     # Database seeding script
+├── middleware.ts            # Next.js middleware for auth
+├── next.config.ts           # Next.js configuration
+├── tailwind.config.ts       # Tailwind CSS config
+└── tsconfig.json            # TypeScript config
 ```
 
 ## Database Setup

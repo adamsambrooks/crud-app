@@ -6,8 +6,8 @@ export function middleware(request: NextRequest) {
   const authToken = request.cookies.get(AUTH_COOKIE);
   const { pathname } = request.nextUrl;
 
-  // Redirect to login if not authenticated and trying to access dashboard
-  if (pathname.startsWith('/dashboard') && !authToken) {
+  // Redirect to login if not authenticated and trying to access protected routes
+  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/employees-table')) && !authToken) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -20,5 +20,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/employees-table/:path*', '/login'],
 };
