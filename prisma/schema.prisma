@@ -1,31 +1,175 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Prisma Schema for Good Therapy San Diego Database
+// Migrated from SQL Server LocalDB to Supabase PostgreSQL
+// Migration Date: October 13, 2025
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Only manage public schema to avoid dropping existing Supabase tables
+  // schemas  = ["public"]  // Not needed if only using one schema
 }
 
+// ============================================================================
+// LOOKUP TABLES (No Dependencies)
+// ============================================================================
+
+model AppointmentType {
+  id            Int     @id @default(autoincrement())
+  code          String? @db.VarChar(50)
+  apptType      String? @map("appt_type") @db.VarChar(100)
+  description   String? @db.Text
+  typeIdForRate Int?    @map("type_id_for_rate")
+
+  // Relationships
+  clients      Client[]
+  rates        Rate[]
+  appointments Appointment[]
+
+  @@map("appointment_types")
+
+}
+
+model TimePeriod {
+  id         BigInt   @id @default(autoincrement())
+  year       Int
+  payPeriod  Int      @map("pay_period")
+  startDate  DateTime @map("start_date") @db.Timestamp
+  endDate    DateTime @map("end_date") @db.Timestamp
+
+  @@map("time_periods")
+
+}
+
+model Log {
+  id          BigInt   @id @default(autoincrement())
+  logTime     DateTime @map("log_time") @db.Timestamp
+  type        String   @db.VarChar(100)
+  description String   @db.Text
+
+  @@map("logs")
+
+}
+
+// ============================================================================
+// CORE BUSINESS TABLES
+// ============================================================================
+
 model Employee {
-  id        Int      @id @default(autoincrement())
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  email     String   @unique
-  salary    String
-  date      DateTime
-  active    Boolean  @default(true)
-  payType   String   @default("Salary") @map("pay_type")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  id           Int       @id @default(autoincrement())
+  name         String?   @db.VarChar(255) // Legacy field
+  email        String?   @db.VarChar(255)
+  active       Int?      @db.SmallInt
+  startDate    DateTime? @map("start_date") @db.Date
+  employeeSpId Int       @default(0) @map("employee_sp_id") // SimplePractice ID
+  lastName     String?   @map("last_name") @db.VarChar(255)
+  firstName    String?   @map("first_name") @db.VarChar(255)
+  payType      String?   @map("pay_type") @db.VarChar(100)
+  gustoId      String?   @map("gusto_id") @db.VarChar(100) // Gusto payroll integration
+
+  // Relationships
+  clients      Client[]
+  rates        Rate[]
+  appointments Appointment[]
 
   @@index([email])
   @@index([lastName])
   @@map("employees")
+
+}
+
+model Client {
+  id                      Int       @id @default(autoincrement())
+  employeeId              Int?      @map("employee_id")
+  clientName              String?   @map("client_name") @db.VarChar(255)
+  txPlan                  Boolean?  @map("tx_plan") // Treatment plan on file
+  npp                     Boolean?  // Notice of Privacy Practices
+  consent                 Boolean?  // Consent forms signed
+  loaded                  String?   @db.VarChar(255) // Data import status
+  email                   String?   @db.VarChar(255)
+  created                 DateTime? @db.Timestamp
+  updated                 DateTime? @db.Timestamp
+  nextAppt                DateTime? @map("next_appt") @db.Date // Will convert 0001-01-01 to NULL
+  active                  Boolean?
+  clientSpId              Int       @default(0) @map("client_sp_id") // SimplePractice ID
+  hashedId                String    @default("") @map("hashed_id") @db.VarChar(50) // Anonymized ID
+  employeeSpId            Int?      @default(0) @map("employee_sp_id")
+  apptTypeId              Int       @map("appt_type_id") // Default appointment type
+  type                    String?   @default("Individual") @db.VarChar(100)
+
+  // Relationships
+  employee         Employee?        @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  appointmentType  AppointmentType  @relation(fields: [apptTypeId], references: [id], onDelete: Restrict)
+  appointments     Appointment[]
+
+  @@index([employeeId])
+  @@index([apptTypeId])
+  @@index([clientName])
+  @@index([email])
+  @@map("clients")
+
+}
+
+model Rate {
+  id         Int       @id @default(autoincrement())
+  rate       Float?    @db.DoublePrecision
+  employeeId Int?      @map("employee_id")
+  startDate  DateTime  @map("start_date") @db.Date
+  active     Int?      @db.SmallInt
+  rateType   String?   @map("rate_type") @db.VarChar(255) // "dollar" or "percent"
+  endDate    DateTime? @map("end_date") @db.Date
+  apptTypeId Int?      @map("appt_type_id")
+  gustoId    BigInt?   @map("gusto_id") // Gusto payroll reference
+
+  // Relationships
+  employee        Employee?        @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  appointmentType AppointmentType? @relation(fields: [apptTypeId], references: [id], onDelete: Restrict)
+  appointments    Appointment[]
+
+  @@index([employeeId])
+  @@index([apptTypeId])
+  @@index([startDate])
+  @@map("rates")
+
+}
+
+model Appointment {
+  id                       Int       @id @default(autoincrement())
+  clientId                 Int       @map("client_id")
+  employeeId               Int       @map("employee_id")
+  rateId                   Int?      @map("rate_id")
+  apptSpId                 BigInt?   @map("appt_sp_id") // SimplePractice ID
+  apptTypeId               Int?      @map("appt_type_id")
+  apptDate                 DateTime  @map("appt_date") @db.Timestamp
+  units                    Float?    @db.DoublePrecision // Billable units
+  clinicianAmount          Float?    @map("clinician_amount") @db.DoublePrecision
+  clientPaymentStatus      String?   @map("client_payment_status") @db.VarChar(255)
+  duration                 Float     @db.DoublePrecision // Session length (minutes)
+  hasProgressNote          Boolean   @map("has_progress_note")
+  created                  DateTime  @db.Timestamp
+  updated                  DateTime  @db.Timestamp
+  clientCharge             Float?    @map("client_charge") @db.DoublePrecision
+  flagged                  Boolean?
+  clientPaymentStatusDesc  String?   @map("client_payment_status_desc") @db.VarChar(255)
+  vacationHours            Float?    @map("vacation_hours") @db.DoublePrecision
+  bonus                    Float?    @db.DoublePrecision
+  correctionPayment        Float?    @map("correction_payment") @db.DoublePrecision
+  personalNote             String?   @map("personal_note") @db.VarChar(255)
+  reimbursement            Float?    @db.DoublePrecision
+  comments                 String?   @db.VarChar(255)
+
+  // Relationships
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  employee        Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  rate            Rate?            @relation(fields: [rateId], references: [id], onDelete: Restrict)
+  appointmentType AppointmentType? @relation(fields: [apptTypeId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, employeeId, apptTypeId, apptDate])
+  @@index([employeeId, apptDate])
+  @@index([apptDate])
+  @@map("appointments")
+
 }

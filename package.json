@@ -11,13 +11,16 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "migrate-data": "tsx scripts/migrate-data.ts"
+    "migrate-data": "tsx scripts/migrate-data.ts",
+    "export-sqlserver": "tsx scripts/export-sqlserver-data.ts",
+    "import-supabase": "tsx scripts/import-to-supabase.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "@tanstack/react-table": "^8.21.3",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
+    "mssql": "^12.0.0",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

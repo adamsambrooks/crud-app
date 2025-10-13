@@ -28,7 +28,11 @@
       "Bash(powershell:*)",
       "Bash(claude mcp:*)",
       "Read(//c/Users/adamb/**)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(ping:*)",
+      "Bash(npx tsx:*)",
+      "Bash(nslookup:*)",
+      "Bash(sqlcmd:*)"
     ],
     "deny": [],
     "ask": []
