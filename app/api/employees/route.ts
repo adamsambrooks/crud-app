@@ -38,8 +38,6 @@ export async function POST(request: NextRequest) {
       !newEmployee.firstName ||
       !newEmployee.lastName ||
       !newEmployee.email ||
-      !newEmployee.salary ||
-      !newEmployee.date ||
       typeof newEmployee.active !== 'boolean' ||
       !newEmployee.payType
     ) {
@@ -59,6 +57,7 @@ export async function POST(request: NextRequest) {
 
     const employee = await createEmployee(newEmployee);
     return NextResponse.json(employee, { status: 201 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // P2002 means unique constraint violation (duplicate email)
     if (error.code === 'P2002') {

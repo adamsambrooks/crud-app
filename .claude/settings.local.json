@@ -34,7 +34,9 @@
       "Bash(nslookup:*)",
       "Bash(sqlcmd:*)",
       "Bash(npx kill-port:*)",
-      "Bash(if exist .next rmdir /s /q .next)"
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

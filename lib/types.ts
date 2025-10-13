@@ -3,8 +3,6 @@ export interface Employee {
   firstName: string;
   lastName: string;
   email: string;
-  salary: string;
-  date: string;
   active: boolean;
   payType: 'Hourly' | 'Salary' | 'Pct';
 }

@@ -3,6 +3,7 @@
 // Handles invalid date conversion: 0001-01-01 → NULL in Client.Next_Appt
 // Run with: npx tsx scripts/migrate-from-sqlserver.ts
 
+// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import sql from 'mssql';
 

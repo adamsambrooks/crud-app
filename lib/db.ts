@@ -10,18 +10,15 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-// Helper to serialize date objects to YYYY-MM-DD format
+// Helper to serialize employee data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeEmployee(employee: any): Employee {
   return {
     id: employee.id,
     firstName: employee.firstName,
     lastName: employee.lastName,
     email: employee.email,
-    salary: employee.salary,
-    date: employee.date instanceof Date
-      ? employee.date.toISOString().split('T')[0]
-      : employee.date,
-    active: employee.active,
+    active: Boolean(employee.active),
     payType: employee.payType,
   };
 }
@@ -51,9 +48,7 @@ export async function createEmployee(
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      salary: data.salary,
-      date: new Date(data.date),
-      active: data.active,
+      active: data.active ? 1 : 0,
       payType: data.payType,
     },
   });
@@ -72,13 +67,12 @@ export async function updateEmployee(
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        salary: data.salary,
-        date: new Date(data.date),
-        active: data.active,
+        active: data.active ? 1 : 0,
         payType: data.payType,
       },
     });
     return serializeEmployee(employee);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // P2025 means record not found
     if (error.code === 'P2025') {
@@ -95,6 +89,7 @@ export async function deleteEmployee(id: number): Promise<Employee | null> {
       where: { id },
     });
     return serializeEmployee(employee);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // P2025 means record not found
     if (error.code === 'P2025') {
@@ -109,7 +104,7 @@ export async function emailExists(
   email: string,
   excludeId?: number
 ): Promise<boolean> {
-  const employee = await prisma.employee.findUnique({
+  const employee = await prisma.employee.findFirst({
     where: { email },
   });
 

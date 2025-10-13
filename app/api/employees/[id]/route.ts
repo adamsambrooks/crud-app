@@ -25,8 +25,6 @@ export async function PUT(
       !updatedData.firstName ||
       !updatedData.lastName ||
       !updatedData.email ||
-      !updatedData.salary ||
-      !updatedData.date ||
       typeof updatedData.active !== 'boolean' ||
       !updatedData.payType
     ) {
@@ -54,6 +52,7 @@ export async function PUT(
     }
 
     return NextResponse.json(employee);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // P2002 means unique constraint violation (duplicate email)
     if (error.code === 'P2002') {

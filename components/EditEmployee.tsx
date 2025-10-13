@@ -14,15 +14,13 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
   const [firstName, setFirstName] = useState(employee.firstName);
   const [lastName, setLastName] = useState(employee.lastName);
   const [email, setEmail] = useState(employee.email);
-  const [salary, setSalary] = useState(employee.salary);
-  const [date, setDate] = useState(employee.date);
   const [active, setActive] = useState(employee.active ?? true);
   const [payType, setPayType] = useState<'Hourly' | 'Salary' | 'Pct'>(employee.payType ?? 'Salary');
 
   const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !email || !salary || !date || !payType) {
+    if (!firstName || !lastName || !email || !payType) {
       return Swal.fire({
         icon: 'error',
         title: 'Error!',
@@ -39,8 +37,6 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
           firstName,
           lastName,
           email,
-          salary,
-          date,
           active,
           payType,
         }),
@@ -116,32 +112,6 @@ export default function EditEmployee({ employee, setIsEditing, onSuccess }: Edit
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-            />
-          </div>
-          <div>
-            <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
-              Salary ($)
-            </label>
-            <input
-              id="salary"
-              type="number"
-              name="salary"
-              value={salary}
-              onChange={(e) => setSalary(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-            />
-          </div>
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-              Date
-            </label>
-            <input
-              id="date"
-              type="date"
-              name="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
             />
           </div>

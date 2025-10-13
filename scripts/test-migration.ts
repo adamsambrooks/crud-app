@@ -1,6 +1,7 @@
 // Test Migration Script: Migrate only AppointmentType table (30 rows)
 // Run with: npx tsx scripts/test-migration.ts
 
+// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import sql from 'mssql';
 

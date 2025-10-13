@@ -78,51 +78,6 @@ export function createEmployeeColumns(
       filterFn: "includesString",
     },
     {
-      accessorKey: "salary",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-200"
-          >
-            Salary
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: ({ row }) => {
-        const amount = row.getValue("salary") as string
-        return <div className="font-medium">${amount}</div>
-      },
-      sortingFn: (rowA, rowB) => {
-        const a = parseFloat(rowA.getValue("salary"))
-        const b = parseFloat(rowB.getValue("salary"))
-        return a - b
-      },
-    },
-    {
-      accessorKey: "date",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-200"
-          >
-            Date
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: ({ row }) => <div>{row.getValue("date")}</div>,
-      sortingFn: (rowA, rowB) => {
-        const a = new Date(rowA.getValue("date")).getTime()
-        const b = new Date(rowB.getValue("date")).getTime()
-        return a - b
-      },
-    },
-    {
       accessorKey: "payType",
       header: ({ column }) => {
         return (
