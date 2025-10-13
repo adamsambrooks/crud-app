@@ -25,7 +25,10 @@
       "Bash(git config:*)",
       "Bash(del nul)",
       "Bash(rm:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(claude mcp:*)",
+      "Read(//c/Users/adamb/**)",
+      "Bash(where:*)"
     ],
     "deny": [],
     "ask": []
