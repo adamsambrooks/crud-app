@@ -32,7 +32,9 @@
       "Bash(ping:*)",
       "Bash(npx tsx:*)",
       "Bash(nslookup:*)",
-      "Bash(sqlcmd:*)"
+      "Bash(sqlcmd:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(if exist .next rmdir /s /q .next)"
     ],
     "deny": [],
     "ask": []

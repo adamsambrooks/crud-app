@@ -66,7 +66,7 @@ export function DataTable<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 100,
       },
     },
   })
@@ -183,7 +183,7 @@ export function DataTable<TData, TValue>({
                 table.setPageSize(Number(e.target.value))
               }}
             >
-              {[10, 25, 50, 100].map((pageSize) => (
+              {[100, 1000, 5000, 10000].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   {pageSize}
                 </option>
