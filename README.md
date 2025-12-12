@@ -25,6 +25,8 @@
 - [Next.js 15](https://nextjs.org) - React framework with App Router
 - [React 19](http://reactjs.org) - UI library
 - [TypeScript](https://www.typescriptlang.org) - Type safety
+- [Prisma](https://www.prisma.io) - Next-generation ORM
+- [SQLite](https://www.sqlite.org) - Embedded database
 - [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
 - [SweetAlert2](https://sweetalert2.github.io) - Beautiful alerts and modals
 - [Turbopack](https://turbo.build/pack) - Fast bundler for development
@@ -35,7 +37,8 @@
 - ✅ Server-side authentication with HTTP-only cookies
 - ✅ Protected routes with Next.js middleware
 - ✅ RESTful API routes
-- ✅ File-based data persistence
+- ✅ SQLite database with Prisma ORM
+- ✅ Type-safe database queries
 - ✅ Responsive design with Tailwind CSS
 - ✅ TypeScript for type safety
 - ✅ Modern Next.js App Router architecture
@@ -55,6 +58,16 @@ Install dependencies:
 npm install
 ```
 
+Set up the database:
+
+```bash
+# Create database and apply schema
+npm run db:push
+
+# Seed with sample data (10 employees)
+npm run migrate-data
+```
+
 Now, you can start the development server with Turbopack:
 
 ```bash
@@ -70,18 +83,23 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 ### Available Scripts
 
-| Script          | Description                                                    |
-| --------------- | -------------------------------------------------------------- |
-| `npm run dev`   | Runs the app in development mode with Turbopack                |
-| `npm run build` | Builds the app for production                                  |
-| `npm start`     | Runs the production build                                      |
-| `npm run lint`  | Runs ESLint to check code quality                              |
+| Script               | Description                                                    |
+| -------------------- | -------------------------------------------------------------- |
+| `npm run dev`        | Runs the app in development mode with Turbopack                |
+| `npm run build`      | Builds the app for production                                  |
+| `npm start`          | Runs the production build                                      |
+| `npm run lint`       | Runs ESLint to check code quality                              |
+| `npm run db:push`    | Push Prisma schema to database (creates/updates DB)            |
+| `npm run db:studio`  | Open Prisma Studio (database GUI)                              |
+| `npm run migrate-data` | Seed database with 10 sample employee records                |
 
 ## Architecture
 
 This app uses the **Next.js App Router** with:
 - **Server Components** for improved performance
 - **API Routes** for backend logic (`/app/api`)
+- **Prisma ORM** for type-safe database access
+- **SQLite** for embedded database storage
 - **Middleware** for authentication (`middleware.ts`)
 - **Client Components** for interactive UI (`'use client'`)
 - **File-based routing** instead of manual route configuration
@@ -102,10 +120,15 @@ crud-app/
 ├── components/            # Reusable React components
 ├── lib/                   # Shared utilities and types
 │   ├── auth.ts           # Authentication helpers
+│   ├── db.ts             # Prisma client & database utilities
 │   ├── data.ts           # Seed data
 │   └── types.ts          # TypeScript types
-├── middleware.ts          # Next.js middleware for auth
-└── data/                  # Runtime data storage (gitignored)
+├── prisma/                # Prisma ORM
+│   ├── schema.prisma     # Database schema
+│   └── dev.db            # SQLite database (gitignored)
+├── scripts/               # Utility scripts
+│   └── migrate-data.ts   # Database seeding script
+└── middleware.ts          # Next.js middleware for auth
 ```
 
 ## Migration from React
@@ -114,13 +137,17 @@ This project has been migrated from Create React App to Next.js 15. Key improvem
 
 - **Server-side rendering** for better performance
 - **API routes** for backend logic (no separate backend needed)
+- **SQLite + Prisma ORM** instead of file-based JSON storage
+- **Type-safe database queries** with auto-generated types
 - **HTTP-only cookies** instead of localStorage for better security
 - **Fixed ID collision bug** from the original implementation
-- **TypeScript** for type safety
+- **Auto-incrementing database IDs** instead of manual calculation
+- **Unique email constraints** enforced at database level
+- **TypeScript** for type safety throughout
 - **Tailwind CSS** for modern styling
 - **Turbopack** for faster development builds
 
-See `CLAUDE.md` for detailed architecture documentation.
+See `CLAUDE.md` for detailed architecture documentation and development guides.
 
 ## Credits
 
